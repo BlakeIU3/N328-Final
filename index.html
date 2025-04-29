@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <title>Starter Pokémon Stats</title>
+    <style>
+      text {
+        font-family: sans-serif;
+        font-size: 15px;
+      }
+
+      .label {
+        transform: rotate(15deg);
+      }
+
+      .bar1 {
+        fill: red;
+      }
+
+      .bar2 {
+        fill: steelblue;
+      }
+
+      .bar3 {
+        fill: crimson;
+      }
+
+      .bar4 {
+        fill: darkviolet;
+      }
+
+      .bar5 {
+        fill: darkblue;
+      }
+
+      .bar6 {
+        fill: darkgoldenrod;
+      }
+
+      .axis line,
+      .axis path {
+        stroke: #000;
+      }
+    </style>
+  </head>
+  <body>
+<div>
+<p>Documentation Link: <a href="https://docs.google.com/document/d/1L9hcybZW6B15-x89umMhlUbHeOuXfCIongUoMBkPBRY/edit?usp=sharing">Google Doc</a></p>
+<p>YouTube Link:  <a href="https://youtu.be/_evZwkcT5Ds">YouTube Link</a></p>
+
+</div>
+    <h2>Attack</h2>
+    <svg id="barChart1" width="700" height="300"></svg>
+
+    <h2>Defense</h2>
+    <svg id="barChart2" width="700" height="300"></svg>
+
+    <h2>HP</h2>
+    <svg id="barChart3" width="700" height="300"></svg>
+
+    <h2>Sp. ATK</h2>
+    <svg id="barChart4" width="700" height="300"></svg>
+
+    <h2>Sp. DEF</h2>
+    <svg id="barChart5" width="700" height="300"></svg>
+
+    <h2>Speed</h2>
+    <svg id="barChart6" width="700" height="300"></svg>
+
+<div id="tooltip" style="
+  position: absolute;
+  visibility: hidden;
+  background-color: lightgrey;
+  border: 1px solid #ccc;
+  padding: 8px;
+  font-size: 15px;
+  border-radius: 4px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  pointer-events: none;">
+</div>
+
+
+    <script>
+      var data = [
+        { name: "Bulbasaur", atk: 49, def: 49, hp: 45, sp_atk: 65, sp_def: 65, speed: 45 },
+        { name: "Ivysaur", atk: 62, def: 63, hp: 60, sp_atk: 80, sp_def: 80, speed: 60 },
+        { name: "Venusaur", atk: 82, def: 83, hp: 80, sp_atk: 100, sp_def: 100, speed: 80 },
+        { name: "Charmander", atk: 52, def: 43, hp: 39, sp_atk: 60, sp_def: 50, speed: 65 },
+        { name: "Charmeleon", atk: 64, def: 58, hp: 58, sp_atk: 80, sp_def: 65, speed: 80 },
+        { name: "Charizard", atk: 84, def: 78, hp: 78, sp_atk: 109, sp_def: 85, speed: 100 },
+        { name: "Squirtle", atk: 48, def: 65, hp: 44, sp_atk: 50, sp_def: 64, speed: 43 },
+        { name: "Wartortle", atk: 63, def: 80, hp: 59, sp_atk: 65, sp_def: 80, speed: 58 },
+        { name: "Blastoise", atk: 83, def: 100, hp: 79, sp_atk: 85, sp_def: 105, speed: 78 }
+      ];
+
+      var width = 700, height = 300;
+      var margin = { top: 20, right: 20, bottom: 80, left: 40 };
+
+      function drawBarChart(svgId, stat, barClass) {
+  var svg = d3.select(svgId)
+    .attr("width", width)
+    .attr("height", height);
+
+  var tooltip = d3.select("#tooltip");
+
+  var x = d3.scale.ordinal()
+    .rangeRoundBands([margin.left, width - margin.right], 0.1)
+    .domain(data.map(function (d) { return d.name; }));
+
+  var y = d3.scale.linear()
+    .range([height - margin.bottom, margin.top])
+    .domain([0, d3.max(data, function (d) { return d[stat]; })]);
+
+  var xAxis = d3.svg.axis().scale(x).orient("bottom");
+  var yAxis = d3.svg.axis().scale(y).orient("left");
+
+  svg.selectAll("rect")
+    .data(data)
+    .enter()
+    .append("rect")
+    .attr("class", barClass)
+    .attr("x", function (d) { return x(d.name); })
+    .attr("y", function (d) { return y(d[stat]); })
+    .attr("width", x.rangeBand())
+    .attr("height", function (d) { return height - margin.bottom - y(d[stat]); })
+    .on("mouseover", function (d) {
+      tooltip.style("visibility", "visible")
+             .html(`<strong>${d.name}</strong><br>${stat.toUpperCase()}: ${d[stat]}`);
+      d3.select(this).style("opacity", 0.7);
+    })
+    .on("mousemove", function () {
+      tooltip.style("top", (d3.event.pageY - 10) + "px")
+             .style("left", (d3.event.pageX + 10) + "px");
+    })
+    .on("mouseout", function () {
+      tooltip.style("visibility", "hidden");
+      d3.select(this).style("opacity", 1);
+    });
+
+  svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(0," + (height - margin.bottom) + ")")
+    .call(xAxis)
+    .selectAll("text")
+    .attr("transform", "rotate(15)")
+    .style("text-anchor", "start");
+
+  svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(" + margin.left + ",0)")
+    .call(yAxis);
+}
+
+
+      drawBarChart("#barChart1", "atk", "bar1");
+      drawBarChart("#barChart2", "def", "bar2");
+      drawBarChart("#barChart3", "hp", "bar3");
+      drawBarChart("#barChart4", "sp_atk", "bar4");
+      drawBarChart("#barChart5", "sp_def", "bar5");
+      drawBarChart("#barChart6", "speed", "bar6");
+    </script>
+  </body>
+</html>
